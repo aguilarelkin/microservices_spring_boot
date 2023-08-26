@@ -18,7 +18,8 @@ import lombok.ToString;
 public class Supplier {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Id    private Long id;
+    @Id
+    private Long id;
     @NotNull
     @Column(unique = true)
     private Long cedula;
@@ -33,4 +34,25 @@ public class Supplier {
     @NotNull
     private Byte contrato;
 
+    public Supplier() {
+    }
+
+    public Supplier(Long cedula, String nombre, String apellido, String telefono, String service, Byte contrato) {
+        this.cedula = cedula;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.telefono = telefono;
+        this.service = service;
+        this.contrato = contrato;
+    }
+
+    public Supplier(Long id, Long cedula, String nombre, String apellido, String telefono, String service, Byte contrato) {
+        this.id = id;
+        this.cedula = cedula;
+        this.nombre = nombre;
+        this.apellido = apellido;
+        this.telefono = telefono;
+        this.service = service;
+        this.contrato = contrato;
+    }
 }

@@ -5,6 +5,9 @@
 /frontend_employe/.pnp
 .pnp.js
 
+# gateway
+/gateway/.idea
+
 # testing
 /frontend_employe/coverage
 

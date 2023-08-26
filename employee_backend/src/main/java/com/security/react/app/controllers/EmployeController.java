@@ -9,9 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
-@CrossOrigin(origins = {"http://localhost:3000","http://127.0.0.1:3000","http://127.0.0.1"})
+
+@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1"})
 @RestController
 @RequestMapping("/api/v1/emp")
 public class EmployeController {
@@ -23,9 +27,10 @@ public class EmployeController {
     public ResponseEntity<?> findEmployes() {
         Map<String, Object> response = new HashMap<>();
         List<Employe> data = null;
-        try {
+        try {//capture try in services
             data = employeService.findEmployes();
         } catch (Exception e) {
+
             response.put("mensaje", "Error al realizar la consulta en la base de datos");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -40,13 +45,13 @@ public class EmployeController {
     public ResponseEntity<?> findEmployeId(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         Optional<Employe> data;
-        try {
+        try {//error in services of ddbb
             data = employeService.findEmployeId(id);
-            if (data.isPresent())
-                response.put("data", data);
+            if (data.isPresent()) response.put("data", data);
 
         } catch (Exception e) {
             response.put("mensaje", "Error al realizar la consulta en la base de datos");
+
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (data.isEmpty()) {
@@ -62,10 +67,7 @@ public class EmployeController {
         Employe data;
         if (result.hasErrors()) {
 
-            List<String> errors = result.getFieldErrors()
-                    .stream()
-                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
-                    .collect(Collectors.toList());
+            List<String> errors = result.getFieldErrors().stream().map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage()).collect(Collectors.toList());
 
             response.put("errors", errors);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.PRECONDITION_REQUIRED);
@@ -97,17 +99,13 @@ public class EmployeController {
         Employe dataFinal = null;
         if (result.hasErrors()) {
 
-            List<String> errors = result.getFieldErrors()
-                    .stream()
-                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
-                    .collect(Collectors.toList());
+            List<String> errors = result.getFieldErrors().stream().map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage()).collect(Collectors.toList());
 
             response.put("errors", errors);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.PRECONDITION_REQUIRED);
         }
         if (dataUpdate.isEmpty()) {
-            response.put("mensaje", "Error: no se pudo editar, el empleado ID: "
-                    .concat(employe.getId().toString().concat(" no existe en la base de datos!")));
+            response.put("mensaje", "Error: no se pudo editar, el empleado ID: ".concat(employe.getId().toString().concat(" no existe en la base de datos!")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
@@ -118,8 +116,10 @@ public class EmployeController {
             dataUpdate.get().setTelefono(employe.getTelefono());
             dataUpdate.get().setSalario(employe.getSalario());
             dataFinal = employeService.updateEmploye(dataUpdate.get());
-            if (dataUpdate.isPresent())
+            if (dataUpdate.isPresent()) {
                 response.put("mensaje", "El cliente ha sido actualizado con éxito!");
+                response.put("data", dataUpdate);
+            }
         } catch (Exception e) {
             response.put("mensaje", "Error al realizar la consulta en la base de datos");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -132,6 +132,10 @@ public class EmployeController {
     public ResponseEntity<?> deleteEmploye(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         try {
+            if (id == null) {
+                response.put("mensaje", "Error al realizar la consulta en la base de datos");
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
             employeService.deleteEmploye(id);
             response.put("mensaje", "Empleado eliminado con éxito");
 
