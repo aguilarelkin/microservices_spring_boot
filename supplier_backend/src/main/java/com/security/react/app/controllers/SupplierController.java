@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1"})
+@CrossOrigin(origins = {/*"http://localhost:3000", "http://127.0.0.1:3000",*/ "http://127.0.0.1"})
 @RestController
 @RequestMapping("/api/v1/sup")
 public class SupplierController {
@@ -34,20 +34,19 @@ public class SupplierController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (data.isEmpty()) {
-            response.put("mensaje", "No existe Empleado en la base de datos!");
+            response.put("mensaje", "No existe proveedor en la base de datos!");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<List<Supplier>>(data, HttpStatus.OK);
     }
 
     @GetMapping("/supplier/{id}")
-    public ResponseEntity<?> findSupplierId(@PathVariable Long id) {
+    public ResponseEntity<?> findSupplierId(@PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
         Optional<Supplier> data;
         try {
-            data = supplierService.findSupplierId(id);
-            if (data.isPresent())
-                response.put("data", data);
+            data = supplierService.findSupplierId(Long.parseLong(id));
+            if (data.isPresent()) response.put("data", data);
 
         } catch (Exception e) {
             response.put("mensaje", "Error al realizar la consulta en la base de datos");
@@ -66,20 +65,18 @@ public class SupplierController {
         Supplier data;
         if (result.hasErrors()) {
 
-            List<String> errors = result.getFieldErrors()
-                    .stream()
-                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
-                    .collect(Collectors.toList());
+            List<String> errors = result.getFieldErrors().stream().map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage()).collect(Collectors.toList());
 
             response.put("errors", errors);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.PRECONDITION_REQUIRED);
         }
 
-        if (supplierService.findSupplierCedula(supplier.getCedula()) != null) {
-            response.put("mensaje", "Proveedor existe");
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
-        }
         try {
+            if (supplierService.findSupplierCedula(supplier.getCedula()) != null) {
+                response.put("mensaje", "Proveedor existe");
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+            }
+
             data = supplierService.createSupplier(supplier);
             if (data != null) {
                 response.put("mensaje", "Proveedor creado con éxito");
@@ -95,23 +92,33 @@ public class SupplierController {
     }
 
     @PutMapping("/supplier/{id}")
-    public ResponseEntity<?> updateSupplier(@Valid @RequestBody Supplier supplier, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> updateSupplier(@Valid @RequestBody Supplier supplier, BindingResult result, @PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Supplier> dataUpdate = supplierService.findSupplierId(supplier.getId());
+
+        Optional<Supplier> dataUpdate = null;
+
         Supplier dataFinal = null;
         if (result.hasErrors()) {
 
-            List<String> errors = result.getFieldErrors()
-                    .stream()
-                    .map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage())
-                    .collect(Collectors.toList());
+            List<String> errors = result.getFieldErrors().stream().map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage()).collect(Collectors.toList());
 
             response.put("errors", errors);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.PRECONDITION_REQUIRED);
         }
+
+        try {
+            if (!supplier.getId().equals(Long.parseLong(id))) {
+                response.put("mensaje", "Error: no se pudo editar, el proveedor :(".concat(" no existe en la base de datos!"));
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+            dataUpdate = supplierService.findSupplierId(supplier.getId());
+        } catch (Exception e) {
+            response.put("mensaje", "Error al realizar la consulta en la base de datos");
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         if (dataUpdate.isEmpty()) {
-            response.put("mensaje", "Error: no se pudo editar, el empleado ID: "
-                    .concat(supplier.getId().toString().concat(" no existe en la base de datos!")));
+            response.put("mensaje", "Error: no se pudo editar, el empleado ID: ".concat(supplier.getId().toString().concat(" no existe en la base de datos!")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
@@ -124,8 +131,7 @@ public class SupplierController {
             dataUpdate.get().setService(supplier.getService());
 
             dataFinal = supplierService.updateSupplier(dataUpdate.get());
-            if (dataUpdate.isPresent())
-                response.put("mensaje", "El proveedor ha sido actualizado con éxito!");
+            if (dataUpdate.isPresent()) response.put("mensaje", "El proveedor ha sido actualizado con éxito!");
         } catch (Exception e) {
             response.put("mensaje", "Error al realizar la consulta en la base de datos");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -135,10 +141,10 @@ public class SupplierController {
     }
 
     @DeleteMapping("/supplier/{id}")
-    public ResponseEntity<?> deleteSupplier(@PathVariable Long id) {
+    public ResponseEntity<?> deleteSupplier(@PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
         try {
-            supplierService.deleteSupplier(id);
+            supplierService.deleteSupplier(Long.parseLong(id));
             response.put("mensaje", "Proveedor eliminado con éxito");
 
         } catch (Exception e) {

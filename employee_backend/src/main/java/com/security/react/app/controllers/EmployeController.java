@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = {"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1"})
+@CrossOrigin(origins = {/*"http://localhost:3000", "http://127.0.0.1:3000",*/ "http://127.0.0.1"})
 @RestController
 @RequestMapping("/api/v1/emp")
 public class EmployeController {
@@ -27,11 +27,11 @@ public class EmployeController {
     public ResponseEntity<?> findEmployes() {
         Map<String, Object> response = new HashMap<>();
         List<Employe> data = null;
-        try {//capture try in services
+        try {
             data = employeService.findEmployes();
         } catch (Exception e) {
 
-            response.put("mensaje", "Error al realizar la consulta en la base de datos");
+            response.put("mensaje", "Error al realizar la consulta en la base de datos j");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         if (data.isEmpty()) {
@@ -42,11 +42,11 @@ public class EmployeController {
     }
 
     @GetMapping("/employe/{id}")
-    public ResponseEntity<?> findEmployeId(@PathVariable Long id) {
+    public ResponseEntity<?> findEmployeId(@PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
         Optional<Employe> data;
-        try {//error in services of ddbb
-            data = employeService.findEmployeId(id);
+        try {
+            data = employeService.findEmployeId(Long.parseLong(id));
             if (data.isPresent()) response.put("data", data);
 
         } catch (Exception e) {
@@ -93,10 +93,10 @@ public class EmployeController {
     }
 
     @PutMapping("/employe/{id}")
-    public ResponseEntity<?> updateEmploye(@Valid @RequestBody Employe employe, BindingResult result, @PathVariable Long id) {
+    public ResponseEntity<?> updateEmploye(@Valid @RequestBody Employe employe, BindingResult result, @PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
-        Optional<Employe> dataUpdate = employeService.findEmployeId(employe.getId());
         Employe dataFinal = null;
+        Optional<Employe> dataUpdate;
         if (result.hasErrors()) {
 
             List<String> errors = result.getFieldErrors().stream().map(err -> "El campo '" + err.getField() + "' " + err.getDefaultMessage()).collect(Collectors.toList());
@@ -104,6 +104,18 @@ public class EmployeController {
             response.put("errors", errors);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.PRECONDITION_REQUIRED);
         }
+
+        try {
+            if (!employe.getId().equals(Long.parseLong(id))) {
+                response.put("mensaje", "Error: no se pudo editar, el empleado ".concat(" no existe en la base de datos!"));
+                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+            }
+            dataUpdate = employeService.findEmployeId(employe.getId());
+        } catch (Exception e) {
+            response.put("mensaje", "Error al realizar la consulta en la base de datos");
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
         if (dataUpdate.isEmpty()) {
             response.put("mensaje", "Error: no se pudo editar, el empleado ID: ".concat(employe.getId().toString().concat(" no existe en la base de datos!")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -129,14 +141,14 @@ public class EmployeController {
     }
 
     @DeleteMapping("/employe/{id}")
-    public ResponseEntity<?> deleteEmploye(@PathVariable Long id) {
+    public ResponseEntity<?> deleteEmploye(@PathVariable String id) {
         Map<String, Object> response = new HashMap<>();
         try {
             if (id == null) {
                 response.put("mensaje", "Error al realizar la consulta en la base de datos");
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
             }
-            employeService.deleteEmploye(id);
+            employeService.deleteEmploye(Long.parseLong(id));
             response.put("mensaje", "Empleado eliminado con éxito");
 
         } catch (Exception e) {

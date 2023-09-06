@@ -17,6 +17,7 @@ public class EmployeServiceImpl implements IEmployeService {
 
     @Override
     public List<Employe> findEmployes() {
+
         return employeDao.findAll();
     }
 

@@ -31,6 +31,7 @@ public class EmployeControllersTest {
     @Mock
     private IEmployeService employeService;
 
+    //connection fail bbdd with mockito
     @Test
     public void when_findEmployes_return_200() {
         Employe employe1 = new Employe(1L, "Andres", "Again", "andres@gmail.com", "123456", 4500.1);
@@ -60,25 +61,39 @@ public class EmployeControllersTest {
 
     @Test
     public void when_findEmployeId_return_200() {
-        long id = 1;
+        Long id = 1L;
         Optional<Employe> employe1 = Optional.of(new Employe(1L, "Andres", "Again", "andres@gmail.com", "123456", 4500.1));
         Optional<Employe> employe;
         employe = employe1;
         when(employeService.findEmployeId(id)).thenReturn(employe);
-        ResponseEntity<?> dat = employeController.findEmployeId(id);
+        ResponseEntity<?> dat = employeController.findEmployeId(String.valueOf(id));
         verify(employeService, times(1)).findEmployeId(id);
         assertTrue(dat.toString().contains("200"));
     }
 
     @Test
     public void when_findEmployeId_return_404() {
-        ResponseEntity<?> dat = employeController.findEmployeId(null);
+        when(employeService.findEmployeId(45L)).thenReturn(Optional.empty());
+        ResponseEntity<?> dat = employeController.findEmployeId("45");
         // Assertions.assertThrows();
+        verify(employeService, times(1)).findEmployeId(45L);
         assertTrue(dat.toString().contains("No existe Empleado en la base de datos!"));
     }
 
     @Test
-    public void when_createEmoloye_return_200() {
+    public void when_findEmployeId_and_idIsNull_return_500() {
+        ResponseEntity<?> dat = employeController.findEmployeId(null);
+        assertTrue(dat.toString().contains("500"));
+    }
+
+    @Test
+    public void when_findEmployeId_and_idIsString_return_500() {
+        ResponseEntity<?> dat = employeController.findEmployeId("a7");
+        assertTrue(dat.toString().contains("500"));
+    }
+
+    @Test
+    public void when_createEmploye_return_200() {
         Employe employe = new Employe("Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
 
         when(employeService.createEmploye(employe)).thenReturn(employe);
@@ -88,7 +103,7 @@ public class EmployeControllersTest {
     }
 
     @Test
-    public void when_createEmoloye_and_exist_employe_return_400() {
+    public void when_createEmploye_and_exist_employe_return_400() {
         Employe employe = new Employe("Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
 
         when(employeService.findEmployeCorreo("natalia@gmail.com")).thenReturn(employe);
@@ -99,7 +114,7 @@ public class EmployeControllersTest {
     }
 
     @Test
-    public void when_createEmoloye_return_428() {
+    public void when_createEmploye_return_428() {
         Employe employe = new Employe();
         Errors errors = new BeanPropertyBindingResult(employe, "datos vacíos");
 //result.reject("email", "vacío");
@@ -119,7 +134,7 @@ public class EmployeControllersTest {
         Long id = 1L;
         when(employeService.updateEmploye(employe)).thenReturn(employe);
         when(employeService.findEmployeId(id)).thenReturn(Optional.of(employe2));
-        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, id);
+        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, String.valueOf(id));
         verify(employeService, times(1)).updateEmploye(employe);
         verify(employeService, times(1)).findEmployeId(id);
 
@@ -131,7 +146,7 @@ public class EmployeControllersTest {
         Employe employe = new Employe(1L, "Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
         Long id = 1L;
         when(employeService.findEmployeId(id)).thenReturn(Optional.empty());
-        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, id);
+        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, String.valueOf(id));
         verify(employeService, times(1)).findEmployeId(id);
         assertTrue(dat.toString().contains("404"));
     }
@@ -141,15 +156,37 @@ public class EmployeControllersTest {
         Employe employe = new Employe(1L, "Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
         Long id = 1L;
         when(result.hasErrors()).thenReturn(true);
-        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, id);
+        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, String.valueOf(id));
         verify(result, times(1)).hasErrors();
         assertTrue(dat.toString().contains("428"));
     }
 
     @Test
+    public void when_updateEmploye_and_idIncorrect_return_404() {
+        Employe employe = new Employe(2L, "Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
+        Long id = 1L;
+        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, String.valueOf(id));
+        assertTrue(dat.toString().contains("404 NOT_FOUND"));
+    }
+
+    @Test
+    public void when_updateEmploye_and_idIsNull_return_500() {
+        Employe employe = new Employe(2L, "Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
+        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, null);
+        assertTrue(dat.toString().contains("500 INTERNAL_SERVER_ERROR"));
+    }
+
+    @Test
+    public void when_updateEmploye_and_idIsString_return_500() {
+        Employe employe = new Employe(2L, "Natalia", "Type", "natalia@gmail.com", "123456", 800000.1);
+        ResponseEntity<?> dat = employeController.updateEmploye(employe, result, "a78");
+        assertTrue(dat.toString().contains("500 INTERNAL_SERVER_ERROR"));
+    }
+
+    @Test
     public void when_deleteEmploye_200() {
         Long id = 1L;
-        ResponseEntity<?> dat = employeController.deleteEmploye(id);
+        ResponseEntity<?> dat = employeController.deleteEmploye(String.valueOf(id));
         verify(employeService, times(1)).deleteEmploye(id);
     }
 
@@ -157,5 +194,11 @@ public class EmployeControllersTest {
     public void when_deleteEmploye_400() {
         ResponseEntity<?> dat = employeController.deleteEmploye(null);
         assertTrue(dat.toString().contains("400"));
+    }
+
+    @Test
+    public void when_deleteEmploye_and_idIsString_500() {
+        ResponseEntity<?> dat = employeController.deleteEmploye("a45");
+        assertTrue(dat.toString().contains("500 INTERNAL_SERVER_ERROR"));
     }
 }

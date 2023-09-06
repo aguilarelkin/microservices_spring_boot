@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -33,8 +35,9 @@ public class SupplierServiceImplTest {
         suppliers.add(supplier);
         suppliers.add(supplier2);
         when(supplierDao.findAll()).thenReturn(suppliers);
-        supplierService.findSuppliers();
+        List<Supplier> data = supplierService.findSuppliers();
         verify(supplierDao, times(1)).findAll();
+        assertTrue(data.size() > 0);
     }
 
     @Test
@@ -44,6 +47,13 @@ public class SupplierServiceImplTest {
         when(supplierDao.findById(id)).thenReturn(optionalSupplier);
         supplierService.findSupplierId(id);
         verify(supplierDao, times(1)).findById(id);
+    }
+
+    @Test
+    public void when_findSupplierId_and_idIsNull() {
+        Optional<Supplier> data = supplierService.findSupplierId(null);
+        verify(supplierDao, times(1)).findById(null);
+        assertTrue(data.toString().contains("Optional.empty"));
     }
 
     @Test
@@ -57,6 +67,13 @@ public class SupplierServiceImplTest {
     }
 
     @Test
+    public void when_findSupplierCedula_and_cedulaIsNull() {
+        Supplier data = supplierService.findSupplierCedula(null);
+        verify(supplierDao, times(1)).findByCedula(null);
+        assertEquals(null, data);
+    }
+
+    @Test
     public void createSupplier() {
         Supplier supplier = new Supplier(1L, 123456L, "Dana", "Paz", "3184127812", "seguridad", (byte) 1);
         when(supplierDao.save(supplier)).thenReturn(supplier);
@@ -65,11 +82,25 @@ public class SupplierServiceImplTest {
     }
 
     @Test
+    public void when_createSupplier_and_supplierIsNull() {
+        Supplier data = supplierService.createSupplier(null);
+        verify(supplierDao, times(1)).save(null);
+        assertEquals(null, data);
+    }
+
+    @Test
     public void updateSupplier() {
         Supplier supplier = new Supplier(1L, 123456L, "Dana", "Paz", "3184127812", "seguridad", (byte) 1);
         when(supplierDao.save(supplier)).thenReturn(supplier);
         supplierService.updateSupplier(supplier);
         verify(supplierDao, times(1)).save(supplier);
+    }
+
+    @Test
+    public void when_updateSupplier_and_supplierIsNull() {
+        Supplier data = supplierService.updateSupplier(null);
+        verify(supplierDao, times(1)).save(null);
+        assertEquals(null, data);
     }
 
     @Test
