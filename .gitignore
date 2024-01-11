@@ -1,22 +1,24 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
+/sp_microservice/.vscode
+.vscode
 # dependencies
-/frontend_employe/node_modules
-/frontend_employe/.pnp
+/sp_microservice/frontend_employe/node_modules
+/sp_microservice/frontend_employe/.pnp
 .pnp.js
 
 # gateway
-/gateway/.idea
+/sp_microservice/gateway/.idea
 
 # testing
-/frontend_employe/coverage
+/sp_microservice/frontend_employe/coverage
 
 # next.js
-/frontend_employe/.next/
-/frontend_employe/out/
+/sp_microservice/frontend_employe/.next/
+/sp_microservice/frontend_employe/out/
 
 # production
-/frontend_employe/build
+/sp_microservice/frontend_employe/build
 
 # misc
 .DS_Store
