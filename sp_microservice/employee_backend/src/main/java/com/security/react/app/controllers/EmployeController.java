@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@CrossOrigin(origins = {/*"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:8090"*/"http://localhost:8090","http://localhost"})
+@CrossOrigin(origins = {/*"http://localhost:3000", "http://127.0.0.1:3000", "http://127.0.0.1:8090"*/"http://localhost:8080","http://localhost"})
 @RestController
 @RequestMapping("/api/v1/emp")
 public class EmployeController {

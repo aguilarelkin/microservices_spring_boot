@@ -10,7 +10,7 @@
 	<groupId>com.security.react</groupId>
 	<artifactId>micro_employe</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>demo</name>
+	<name>micro_employe</name>
 	<description>Demo project for Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>

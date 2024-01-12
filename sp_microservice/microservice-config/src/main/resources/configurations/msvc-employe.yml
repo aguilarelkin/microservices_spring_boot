@@ -1,0 +1,28 @@
+server:
+  http:
+    port: '8090'
+  port: '8090'
+
+eureka:
+  instance:
+    hostname: localhost
+  client:
+    server-url:
+      defaultZone: http://localhost:8761/eureka
+spring:
+  application:
+    name: msvc-employe
+  datasource:
+    password: root
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    url: jdbc:mysql://localhost:3306/employes?useSSL=true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: debug

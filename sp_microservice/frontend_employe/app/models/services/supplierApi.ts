@@ -1,6 +1,6 @@
 import { headersApi } from "./authorization/authorization";
 
-const API_SUPPLIER = "http://localhost:9001/api/v1/sup";
+const API_SUPPLIER = "http://localhost:8080/api/v1/sup";
 
 export const findSuppliers = async () => {
     try {
